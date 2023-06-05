@@ -5,6 +5,7 @@ import { Component } from '@angular/core';
   templateUrl: './salida.component.html',
   styleUrls: ['./salida.component.css']
 })
+
 export class SalidaComponent {
   title = 'front-inventario';
   fecha = ""
@@ -20,6 +21,19 @@ export class SalidaComponent {
   cantidad: number = 0;
   filteredProductos: any[] = [];
   porce:number = 50;
+
+  productos = [
+    { id: 1, name: 'Producto 1' },
+    { id: 2, name: 'Producto 2' },
+    { id: 3, name: 'Producto 3' }
+  ];
+  
+  usuarios = [
+    { id: 1, name: 'Tomas Salas' },
+    { id: 2, name: 'Maximiliano Vera' },
+    { id: 3, name: 'Ricardo Valenzuela' }
+  ];
+
   checkValidity() {
     if (this.fecha.trim() === '') {
       this.showAlert = true;
@@ -51,6 +65,7 @@ export class SalidaComponent {
     this.secondStep = true
     this.porce = 100
   }
+
   addProducto(){
     const nameProducto = this.productos.find(producto => producto.id == this.select_producto)
     this.nameProducto = nameProducto?.name
@@ -71,14 +86,4 @@ export class SalidaComponent {
     this.select_producto = ''
     this.cantidad = 0
   }
-  productos = [
-    { id: 1, name: 'Producto 1' },
-    { id: 2, name: 'Producto 2' },
-    { id: 3, name: 'Producto 3' }
-  ];
-  usuarios = [
-    { id: 1, name: 'Tomas Salas' },
-    { id: 2, name: 'Maximiliano Vera' },
-    { id: 3, name: 'Ricardo Valenzuela' }
-  ];
 }
