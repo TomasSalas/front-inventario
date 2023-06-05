@@ -1,0 +1,53 @@
+<div class="container pt-5">
+  <div class="d-flex justify-content-center">
+    <div class="progress row col-4">
+      <div class="progress-bar bg-success" role="progressbar" aria-valuemin="0" aria-valuemax="100" [style.width]="porce + '%'" [attr.aria-valuenow]="porce"></div>
+    </div>
+  </div>
+
+  <div class="container d-flex justify-content-center">
+      <div *ngIf="oneStep" class="row col-2 d-flex justify-content-center pt-2">
+        Primer Paso
+      </div>
+      <div  *ngIf="secondStep" class="row col-2 d-flex justify-content-center pt-2">
+        Segundo Paso
+      </div>
+  </div>
+
+  <div *ngIf="oneStep" class="container d-flex justify-content-center pt-5">
+    <div class="row col-4">
+        <input type="date" class="form-control" name="fecha" [(ngModel)]="fecha" required>
+        <ngx-select class="form-control w-100 mt-2" [items]="usuarios" [(ngModel)]="select_usuario" optionTextField="name" />
+        <button type="button" (click)="nextStep()" class="btn btn-success mt-2">Siguente</button>
+      <div *ngIf="showAlert" class="alert alert-danger mt-5">{{messageAlert}}</div>
+    </div>
+  </div>
+  
+  <div *ngIf="secondStep" class="container d-flex justify-content-center pt-5">
+    <div class="row col-4">
+      <ngx-select class="form-control" [items]="productos" [(ngModel)]="select_producto" optionTextField="name" />
+      <input type="number" class="form-control" name="cantidad" [(ngModel)]="cantidad">
+      <button type="button" class="btn btn-success mt-2" (click)="addProducto()">Agregar</button>
+      <div *ngIf="showAlert" class="alert alert-danger mt-5">{{messageAlert}}</div>
+    </div>
+  </div>
+  
+  <div *ngIf="secondStep" class="container d-flex justify-content-center pt-5">
+    <div class="row col-4">
+      <table  class="table table-bordered">
+        <thead class="table-warning">
+          <tr>
+            <th scope="col">Nombre</th>
+            <th scope="col">Cantidad</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let dato of arrayProductoView">
+            <td>{{ dato.nombre }}</td>
+            <td>{{ dato.cantidad }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
