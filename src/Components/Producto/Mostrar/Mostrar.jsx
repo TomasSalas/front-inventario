@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import NavBar from "../../NavBar/Nav.jsx";
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -36,7 +36,7 @@ function Mostrar() {
     }).then(async (result) => {
       if (result.isConfirmed) {
         console.log(data);
-        const url = "http://localhost:3000/deleteProduct";
+        const url = "http://192.168.1.175:3000/deleteProduct";
         const response = await fetch(url, {
           method: "POST",
           headers: {
@@ -67,7 +67,7 @@ function Mostrar() {
   };
 
   const onSubmit = async (data) => {
-    const url = "http://localhost:3000/updateProduct";
+    const url = "http://192.168.1.175:3000/updateProduct";
     const response = await fetch(url, {
       method: "PUT",
       headers: {
@@ -83,13 +83,14 @@ function Mostrar() {
         'Producto actualizado correctamente',
         'success'
       ).then(() => {
-        fetchData();
+        window.location.reload();
+
       })
     }
   };
 
   const fetchData = async () => {
-    const url = "http://localhost:3000/viewProducts";
+    const url = "http://192.168.1.175:3000/viewProducts";
     const response = await fetch(url, {
       method: "GET",
       headers: {
@@ -102,7 +103,7 @@ function Mostrar() {
   };
 
   const viewTypeProduct = async () => {
-    const url = "http://localhost:3000/viewTypeProduct";
+    const url = "http://192.168.1.175:3000/viewTypeProduct";
     const response = await fetch(url, {
       method: "GET",
       headers: {
@@ -261,16 +262,16 @@ function Mostrar() {
                   </input>
                 </div>
 
-                <div className="form-group mt-3 grid gap-3">
+                <div className="d-flex justify-content-start">
                   <button
                     type="submit"
-                    className="btn btn-success"
+                    className="btn btn-success mt-3 me-2"
                   >
                     Guardar
                   </button>
                   <button
                     type="button"
-                    className="btn btn-danger"
+                    className="btn btn-danger mt-3"
                     data-bs-dismiss="modal"
                   >
                     Cerrar

@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import NavBar from "../../NavBar/Nav.jsx"
 import { useForm } from "react-hook-form";
+import Swal from 'sweetalert2'
 
 function Ingresar() {
-
+  const [data, setData] = useState("");
   const { register, handleSubmit, formState: { errors } , reset } = useForm();
+  
   const onSubmit = async (data) => {
-    console.log(data);
-
-    const url = "http://localhost:3000/addProduct";
+    const url = "http://192.168.1.175:3000/addProduct";
     const response = await fetch(url, {
       method: "POST",
       headers: {
@@ -22,30 +22,33 @@ function Ingresar() {
     
 
     if(error == null) {
-      alert("Producto agregado correctamente");
-      reset();
+      Swal.fire({
+        icon:'success',
+        title: 'Producto agregado correctamente',
+        showConfirmButton: false,
+        timer: 1500
+      }).then(() => {
+        reset();
+      })
     }
 
   }
-
-  const [data, setData] = useState("");
-
+  const fetchData = async () => {
+    const url = "http://192.168.1.175:3000/viewTypeProduct";
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      }
+    })
+    const { data } = await response.json();
+    setData(data);
+  }
   useEffect(() => {
-    const fetchData = async () => {
-      const url = "http://localhost:3000/viewTypeProduct";
-      const response = await fetch(url, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json"
-        }
-      })
-      const { data } = await response.json();
-      setData(data);
-    }
     fetchData();
-
   }, [])
+
   return (
     <>
       <NavBar />
