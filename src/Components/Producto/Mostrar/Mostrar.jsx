@@ -5,15 +5,18 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useForm } from "react-hook-form";
 import Swal from 'sweetalert2'
+import { useNavigate } from "react-router-dom";
+import jwt_decode from "jwt-decode"
 
 function Mostrar() {
+  const navigate = useNavigate();
   const [productos, setProductos] = useState([]);
   const [typeProduct, setTypeProduct] = useState([]);
   const { register, handleSubmit, formState: { errors }, setValue } = useForm();
   const [searchValue, setSearchValue] = useState('');
+  const [userRole , setUserRole] = useState(0);
 
   const handleSearchChange = (event) => {
-    console.log(event.target.value);
     setSearchValue(event.target.value);
   };
 
@@ -35,8 +38,7 @@ function Mostrar() {
       confirmButtonText: 'Confirmar'
     }).then(async (result) => {
       if (result.isConfirmed) {
-        console.log(data);
-        const url = "http://192.168.1.175:3000/deleteProduct";
+        const url = "http://192.168.1.32:3000/deleteProduct";
         const response = await fetch(url, {
           method: "POST",
           headers: {
@@ -66,8 +68,54 @@ function Mostrar() {
     })
   };
 
+  const validateToken = async () => {
+    const token = localStorage.getItem('token');
+    if (token != null) {
+      const decoded = jwt_decode(token);
+      //setDataUser(decoded.data)
+      setUserRole(decoded.role)
+      const currentTime = Math.round(new Date().getTime() / 1000);
+
+      if(currentTime > decoded.exp){
+        Swal.fire({
+          icon:'warning',
+          title: 'Sesión expirada',
+          showConfirmButton: false,
+          timer: 1500
+        }).then(() => {
+          localStorage.removeItem('token');
+          return navigate('/');
+        })
+      }
+    }else{
+      return navigate('/');
+    }
+  };
+
+  const changeProduct = async (data) => {
+    const url = 'http://192.168.1.32:3000/changeHistory';
+    const response = await fetch(url , {
+      method: 'POST',
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({
+        id:1, // CHANGE ID USER LOGIN
+        idProducto: data.id,
+        cantidad: data.cantidad
+      })
+    });
+
+    const {error} = await response.json();
+
+    if( error === null){
+      return true;
+    }
+  };
+
   const onSubmit = async (data) => {
-    const url = "http://192.168.1.175:3000/updateProduct";
+    const url = "http://192.168.1.32:3000/updateProduct";
     const response = await fetch(url, {
       method: "PUT",
       headers: {
@@ -76,6 +124,16 @@ function Mostrar() {
       },
       body: JSON.stringify(data)
     });
+
+    if(!changeProduct(data)){
+      Swal.fire(
+        'Error',
+        'Registro historico con error',
+        'error'
+      );
+      return;
+    }
+
     const { error } = await response.json();
     if (error === null) {
       Swal.fire(
@@ -84,13 +142,12 @@ function Mostrar() {
         'success'
       ).then(() => {
         window.location.reload();
-
       })
     }
   };
 
   const fetchData = async () => {
-    const url = "http://192.168.1.175:3000/viewProducts";
+    const url = "http://192.168.1.32:3000/viewProducts";
     const response = await fetch(url, {
       method: "GET",
       headers: {
@@ -103,7 +160,7 @@ function Mostrar() {
   };
 
   const viewTypeProduct = async () => {
-    const url = "http://192.168.1.175:3000/viewTypeProduct";
+    const url = "http://192.168.1.32:3000/viewTypeProduct";
     const response = await fetch(url, {
       method: "GET",
       headers: {
@@ -116,13 +173,14 @@ function Mostrar() {
   };
 
   useEffect(() => {
+    validateToken();
     fetchData();
     viewTypeProduct();
   }, []);
 
   return (
     <>
-      <NavBar />
+      <NavBar role={userRole}/>
       <div className="container d-flex justify-content-center pt-5">
         <div className="table-responsive pt-5">
           {/* INPUT BUSQUEDA */}

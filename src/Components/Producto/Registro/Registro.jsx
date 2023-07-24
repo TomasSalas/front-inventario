@@ -1,23 +1,23 @@
-import NavBar from "../NavBar/Nav.jsx"
+import NavBar from "../../NavBar/Nav.jsx"
 import { useEffect, useState } from "react";
-import jwt_decode from "jwt-decode"
 import { useNavigate } from "react-router-dom";
+import jwt_decode from "jwt-decode"
 
-function MostrarSalida() {
+function Registro () {
   const navigate = useNavigate();
-  const [salida, setSalida] = useState([]);
+  const [ productHistory , setProductHistory] = useState([]);
   const [userRole , setUserRole] = useState(0);
 
-  const getOutputProducts = async () => {
-    const url = 'http://192.168.1.32:3000/viewOutputProducts'
+  const getHistory = async () => {
+    const url = 'http://192.168.1.32:3000/viewChangeHistory'
     const response = await fetch(url, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json'
       }
-    })
-    const { data } = await response.json()
-    setSalida(data[0])
+    });
+    const { data } = await response.json();
+    setProductHistory(data);
   }
 
   const validateToken = async () => {
@@ -43,36 +43,34 @@ function MostrarSalida() {
       return navigate('/');
     }
   };
-
-  useEffect(() => {
+  useEffect(() =>{
     validateToken();
-    getOutputProducts()
-  }, [])
+    getHistory();
+  },[])
+
   return (
     <>
       <NavBar role={userRole}/>
-      <div className="container d-flex justify-content-center pt-5">
+      <div className="container pt-5">
         <div className="table-responsive pt-5">
           <table className="table">
             <thead>
               <tr>
-                <th scope="col">ID</th>
-                <th scope="col">USUARIO ENTREGA</th>
+                <th scope="col">ID HISTORICO</th>
+                <th scope="col">USUARIO MODIFICADOR</th>
                 <th scope="col">PRODUCTO</th>
                 <th scope="col">CANTIDAD</th>
-                <th scope="col">SALIDA</th>
-                <th scope="col">FECHA SALIDA</th>
+                <th scope="col">FECHA MODIFICACION</th>
               </tr>
             </thead>
             <tbody>
-              {salida.map(salida => (
-                <tr key={salida.ID_SALIDA}>
-                  <td>{salida.ID_SALIDA}</td>
-                  <td>{salida.USUARIO_ENTREGA}</td>
-                  <td>{salida.NOMBRE_PRODUCTO}</td>
-                  <td>{salida.CANTIDAD}</td>
-                  <td>{salida.USUARIO_SALIDA}</td>
-                  <td>{new Date(salida.FECHA_SALIDA).toLocaleDateString()}</td>
+            {productHistory.map(item => (
+                <tr key={item.ID_HISTORICO}>
+                  <td>{item.ID_HISTORICO}</td>
+                  <td>{item.NOMBRE + ' ' +item.APELLIDO}</td>
+                  <td>{item.NOMBRE_PRODUCTO}</td>
+                  <td>{item.CANTIDAD}</td>
+                  <td>{new Date(item.FECHA).toLocaleDateString()}</td>
                 </tr>
               ))}
             </tbody>
@@ -83,4 +81,4 @@ function MostrarSalida() {
   )
 }
 
-export default MostrarSalida
+export default Registro

@@ -2,13 +2,17 @@ import { useEffect, useState } from "react";
 import NavBar from "../../NavBar/Nav.jsx"
 import { useForm } from "react-hook-form";
 import Swal from 'sweetalert2'
+import { useNavigate } from "react-router-dom";
+import jwt_decode from "jwt-decode"
 
 function Ingresar() {
+  const navigate = useNavigate();
   const [data, setData] = useState("");
   const { register, handleSubmit, formState: { errors } , reset } = useForm();
-  
+  const [userRole , setUserRole] = useState(0);
+
   const onSubmit = async (data) => {
-    const url = "http://192.168.1.175:3000/addProduct";
+    const url = "http://192.168.1.32:3000/addProduct";
     const response = await fetch(url, {
       method: "POST",
       headers: {
@@ -33,8 +37,9 @@ function Ingresar() {
     }
 
   }
+
   const fetchData = async () => {
-    const url = "http://192.168.1.175:3000/viewTypeProduct";
+    const url = "http://192.168.1.32:3000/viewTypeProduct";
     const response = await fetch(url, {
       method: "GET",
       headers: {
@@ -45,13 +50,39 @@ function Ingresar() {
     const { data } = await response.json();
     setData(data);
   }
+
+  const validateToken = async () => {
+    const token = localStorage.getItem('token');
+    if (token != null) {
+      const decoded = jwt_decode(token);
+      //setDataUser(decoded.data)
+      setUserRole(decoded.role)
+      const currentTime = Math.round(new Date().getTime() / 1000);
+
+      if(currentTime > decoded.exp){
+        Swal.fire({
+          icon:'warning',
+          title: 'Sesión expirada',
+          showConfirmButton: false,
+          timer: 1500
+        }).then(() => {
+          localStorage.removeItem('token');
+          return navigate('/');
+        })
+      }
+    }else{
+      return navigate('/');
+    }
+  }
+
   useEffect(() => {
+    validateToken();
     fetchData();
   }, [])
 
   return (
     <>
-      <NavBar />
+      <NavBar role={userRole}/>
       <div className="container d-flex justify-content-center pt-5">
         <div className="row col-md-6">
           <form className=" pt-5" onSubmit={handleSubmit(onSubmit)}>

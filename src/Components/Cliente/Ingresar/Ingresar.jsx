@@ -2,13 +2,41 @@ import { useEffect, useState } from "react";
 import NavBar from "../../NavBar/Nav.jsx"
 import { useForm } from "react-hook-form";
 import Swal from 'sweetalert2'
+import { useNavigate } from "react-router-dom";
+import jwt_decode from "jwt-decode"
 
 function IngresarCliente() {
+  const navigate = useNavigate();
   const { register, handleSubmit, formState: { errors }, reset } = useForm();
   const [clientesType, setClientesType] = useState([]);
+  const [userRole , setUserRole] = useState(0);
+
+  const validateToken = async () => {
+    const token = localStorage.getItem('token');
+    if (token != null) {
+      const decoded = jwt_decode(token);
+      //setDataUser(decoded.data)
+      setUserRole(decoded.role)
+      const currentTime = Math.round(new Date().getTime() / 1000);
+
+      if(currentTime > decoded.exp){
+        Swal.fire({
+          icon:'warning',
+          title: 'Sesión expirada',
+          showConfirmButton: false,
+          timer: 1500
+        }).then(() => {
+          localStorage.removeItem('token');
+          return navigate('/');
+        })
+      }
+    }else{
+      return navigate('/');
+    }
+  }
 
   const onSubmit = async (dataClient) => {
-    const url = "http://192.168.1.175:3000/createUser"
+    const url = "http://192.168.1.32:3000/createUser"
     const response = await fetch(url, {
       method: "POST",
       headers: {
@@ -19,7 +47,6 @@ function IngresarCliente() {
     })
 
     const data = await response.json();
-    console.log(data)
 
     if( data.error === null){
       Swal.fire({
@@ -43,7 +70,7 @@ function IngresarCliente() {
   };
 
   const tipoUsario = async () => {
-    const url = "http://192.168.1.175:3000/viewTypeUser";
+    const url = "http://192.168.1.32:3000/viewTypeUser";
     const response = await fetch(url, {
       method: "GET",
       headers: {
@@ -56,11 +83,12 @@ function IngresarCliente() {
   }
 
   useEffect(() => {
+    validateToken();
     tipoUsario();
   }, [])
   return (
     <>
-      <NavBar />
+      <NavBar role={userRole}/>
       <div className="container d-flex justify-content-center pt-5">
         <div className="row col-md-6">
           <form className=" pt-5" onSubmit={handleSubmit(onSubmit)}>

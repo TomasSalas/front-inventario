@@ -4,16 +4,18 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useForm } from "react-hook-form";
 import Swal from 'sweetalert2'
-
+import { useNavigate } from "react-router-dom";
+import jwt_decode from "jwt-decode"
 
 function MostrarCliente() {
-
+  const navigate = useNavigate();
   const { register, handleSubmit, formState: { errors }, setValue , reset} = useForm();
   const [clientes, setClientes] = useState([]);
   const [clientesType, setClientesType] = useState([]);
+  const [userRole , setUserRole] = useState(0);
 
   const getCliente = async () => {
-    const url = 'http://192.168.1.175:3000/viewUser';
+    const url = 'http://192.168.1.32:3000/viewUser';
     const response = await fetch(url, {
       method: 'GET',
       headers: {
@@ -25,7 +27,7 @@ function MostrarCliente() {
   }
 
   const tipoUsario = async () => {
-    const url = "http://192.168.1.175:3000/viewTypeUser";
+    const url = "http://192.168.1.32:3000/viewTypeUser";
     const response = await fetch(url, {
       method: "GET",
       headers: {
@@ -48,7 +50,6 @@ function MostrarCliente() {
       body: JSON.stringify(editData)
     })
     const {error} = await response.json();
-    console.log(error);
 
     if( error === null){
       Swal.fire({
@@ -82,7 +83,7 @@ function MostrarCliente() {
       confirmButtonText: 'Confirmar'
     }).then(async (result) => {
       if (result.isConfirmed) {
-        const url = "http://192.168.1.175:3000/deleteUser";
+        const url = "http://192.168.1.32:3000/deleteUser";
         const response = await fetch(url, {
           method: "POST",
           headers: {
@@ -112,13 +113,39 @@ function MostrarCliente() {
     })
   }
 
+  const validateToken = async () => {
+    const token = localStorage.getItem('token');
+
+    if (token != null) {
+      const decoded = jwt_decode(token);
+      //setDataUser(decoded.data)
+      setUserRole(decoded.role)
+      const currentTime = Math.round(new Date().getTime() / 1000);
+
+      if(currentTime > decoded.exp){
+        Swal.fire({
+          icon:'warning',
+          title: 'Sesión expirada',
+          showConfirmButton: false,
+          timer: 1500
+        }).then(() => {
+          localStorage.removeItem('token');
+          return navigate('/');
+        })
+      }
+    }else{
+      return navigate('/');
+    }
+  }
+
   useEffect(() => {
+    validateToken();
     getCliente();
     tipoUsario();
   }, [])
   return (
     <>
-      <NavBar />
+      <NavBar role={userRole}/>
       <div className="container pt-5">
         <div className="table-responsive pt-5">
           <table className="table table-striped">

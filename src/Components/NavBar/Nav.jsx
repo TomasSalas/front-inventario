@@ -1,17 +1,40 @@
 import { Link } from 'react-router-dom';
-function NavBar() {
+import { useNavigate } from "react-router-dom";
+import { useState , useEffect } from "react";
+
+function NavBar(props) {
+  const [permiso , setPermiso] = useState(false)
+  const { role } = props;
+
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    navigate('/');
+  };
+
+
+
+  useEffect(() => {
+    if (role == 1) {
+      setPermiso(true);
+    }
+  }, [role]);
+  
+  
+
   return (
     <>
       <nav className="navbar bg-body-tertiary fixed-top">
         <div className="container-fluid">
-          <a className="navbar-brand" href="#"> 
-            Inventario 
+          <Link className="navbar-brand" to="/dashboard">
+            Inventario
             <img
               src="../../src/assets/inventario-disponible.png"
               alt="Imagen de SalidaProducto"
               style={{ width: '35px', height: '35px', marginBottom: '5px' }}
-            /> 
-          </a>
+            />
+          </Link>
           <button className="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar" aria-label="Toggle navigation">
             <span className="navbar-toggler-icon"></span>
           </button>
@@ -27,19 +50,30 @@ function NavBar() {
                     Producto
                   </a>
                   <ul className="dropdown-menu">
-                    <Link className="dropdown-item" to="/create-product">Ingresar</Link>
+                    {
+                      permiso && (
+                        <Link className="dropdown-item" to="/create-product">Ingresar</Link>
+                      )
+                    }
+                    
                     <Link className="dropdown-item" to="/view-product">Mostrar</Link>
+                    <Link className="dropdown-item" to="/change-history">Registro Cambios</Link>
                   </ul>
                 </li>
-                <li className="nav-item dropdown">
-                  <a className="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    Usuario
-                  </a>
-                  <ul className="dropdown-menu">
-                    <Link className="dropdown-item" to="/create-client">Crear</Link>
-                    <Link className="dropdown-item" to="/view-client">Mostrar</Link>
-                  </ul>
-                </li>
+                {
+                  permiso && (
+                    <li className="nav-item dropdown">
+                    <a className="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                      Usuario
+                    </a>
+                    <ul className="dropdown-menu">
+                      <Link className="dropdown-item" to="/create-client">Crear</Link>
+                      <Link className="dropdown-item" to="/view-client">Mostrar</Link>
+                    </ul>
+                  </li>
+                  )
+                }
+
                 <li className="nav-item dropdown">
                   <a className="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                     Salida
@@ -49,6 +83,12 @@ function NavBar() {
                     <Link className="dropdown-item" to="/view-output-product">Mostrar salidas</Link>
 
                   </ul>
+                </li>
+
+                <li className="nav-item">
+                  <button className="btn btn-danger" onClick={handleLogout}>
+                    Cerrar sesión
+                  </button>
                 </li>
               </ul>
             </div>

@@ -2,17 +2,21 @@ import NavBar from "../NavBar/Nav.jsx";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import Swal from 'sweetalert2'
+import jwt_decode from "jwt-decode"
+import { useNavigate } from "react-router-dom";
 
 function Salida() {
+  const navigate = useNavigate();
   const [usuarioSalida, setUsuarioSalida] = useState([]);
   const [usuarioEntrega, setUsuarioEntrega] = useState([]);
   const [productos, setProductos] = useState([]);
   const { register, handleSubmit, formState: { errors }, reset, watch } = useForm();
   const [cantidad, setCantidad] = useState(0);
   const selectedProduct = watch("producto");
+  const [userRole , setUserRole] = useState(0);
 
   const getUsuario = async () => {
-    const url = "http://192.168.1.175:3000/viewUser"
+    const url = "http://192.168.1.32:3000/viewUser"
     const response = await fetch(url, {
       method: "GET",
       headers: {
@@ -25,7 +29,7 @@ function Salida() {
   }
 
   const getProductos = async () => {
-    const url = "http://192.168.1.175:3000/viewProducts";
+    const url = "http://192.168.1.32:3000/viewProducts";
     const response = await fetch(url, {
       method: "GET",
       headers: {
@@ -46,7 +50,7 @@ function Salida() {
   };
 
   const onSubmit = async (dataSalida) => {
-    const url = 'http://192.168.1.175:3000/outputProducts';
+    const url = 'http://192.168.1.32:3000/outputProducts';
     const response = await fetch(url, {
       method: "POST",
       headers: {
@@ -69,7 +73,32 @@ function Salida() {
     }
   }
 
+  const validateToken = async () => {
+    const token = localStorage.getItem('token');
+    if (token != null) {
+      const decoded = jwt_decode(token);
+      //setDataUser(decoded.data)
+      setUserRole(decoded.role)
+      const currentTime = Math.round(new Date().getTime() / 1000);
+
+      if(currentTime > decoded.exp){
+        Swal.fire({
+          icon:'warning',
+          title: 'Sesión expirada',
+          showConfirmButton: false,
+          timer: 1500
+        }).then(() => {
+          localStorage.removeItem('token');
+          return navigate('/');
+        })
+      }
+    }else{
+      return navigate('/');
+    }
+  };
+
   useEffect(() => {
+    validateToken();
     getUsuario();
     getProductos();
   }, []);
@@ -82,7 +111,7 @@ function Salida() {
 
   return (
     <>
-      <NavBar />
+      <NavBar role={userRole}/>
       <div className="d-flex justify-content-center container pt-5">
         <div className="col-md-8 pt-5">
           <form onSubmit={handleSubmit(onSubmit)}>
